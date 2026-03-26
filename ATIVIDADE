@@ -1,0 +1,77 @@
+-- #Aula 25/03/26 - Introdução MySQL e JSON--
+CREATE SCHEMA exemplos_json;
+use exemplos_json;
+
+-- Exemplos --
+CREATE TABLE palavra(
+json_palavra varchar(350));
+INSERT INTO palavra VALUES(
+'
+  "nome":"John",
+  "sobrenome": "Smith",
+  "ID":"001"
+'
+);
+
+SELECT * FROM palavra;
+CREATE TABLE palavra2(
+json_palavra2 varchar(350));
+INSERT INTO palavra2 VALUES(
+'{
+  "nome":"John",
+  "sobrenome": "Smith",
+  "ID":"001"
+}'
+);
+
+SELECT * FROM palavra2;
+
+-- Aula Pratica --
+SELECT * FROM countryinfo;
+
+SELECT * FROM countryinfo WHERE _id = 'BRA';
+-- Exibe conteudo por Chaves (propriedades, atributos) --
+SELECT JSON_KEYS(doc) FROM countryinfo WHERE _id = 'BRA';
+-- EXTRACT $. Exibe mais de uma chave interna do bloco JSON --
+SELECT JSON_KEYS(doc,"$.geography") FROM countryinfo WHERE _id = 'BRA';
+SELECT JSON_EXTRACT(doc,"$.government") FROM countryinfo WHERE _id = 'BRA';
+SELECT JSON_EXTRACT(doc,"$.IndepYear") FROM countryinfo WHERE _id = 'BRA';
+-- EXTRACT Exibe mais duas chave interna do bloco JSON --
+SELECT DISTINCT JSON_EXTRACT(doc, "$.geography.Continent") AS continente FROM countryinfo ORDER BY continent DESC;
+SELECT JSON_EXTRACT(doc,"$.geography.Continent") AS CONTINENTES FROM countryinfo WHERE _id = 'BRA';
+SELECT JSON_EXTRACT(doc,"$.demographics.Population") AS POPULAÇÃO FROM countryinfo ;
+
+SELECT JSON_EXTRACT(doc,"$.geography.Continent") AS CONTINENTE,(JSON_EXTRACT(doc,"$.demographics.Population")) AS POPULAÇÃO FROM countryinfo;
+
+
+
+SELECT JSON_EXTRACT(doc,"$.demographics.Population") AS População_Total,(JSON_EXTRACT(doc,"$.government.monarchy")) AS Monarquias, 
+(JSON_EXTRACT(doc,"$.demographics.LifeExpectancy")) Expectativa_Vida; 
+
+
+# Questão 1
+/*Exibam uma tabela com a população total e a média  da expectativa de vida de cada continente para países que são monarquias. agrupe e ordene 
+os dados exibidos*/
+-- ANALISE TABLES --
+SELECT * FROM city; -- ID, Name, CountryCode, District, Info --
+SELECT * FROM country; -- Code, Name, Capital, Code2 --
+SELECT * FROM countryinfo; -- #, doc ({"GNP": 828, "_id": "00005de917d80000000000000000", "Code": "ABW", "Name": "Aruba", "IndepYear": null,
+-- "geography": {"Region": "Caribbean", "Continent": "North America","SurfaceArea": 193}, "government": {"HeadOfState": "Beatrix","GovernmentForm": "Nonmetropolitan Territory of The Netherlands"
+-- },"demographics": {"Population": 103000, "LifeExpectancy": 78.4000015258789 }}, _id, _json_schema --
+SELECT * FROM countrylanguage; -- #, CountryCode, Language, IsOfficial, Percentage --
+
+-- ATIVIDADE --
+SELECT JSON_EXTRACT(doc -> "$.geography.Continent") AS CONTINENTE, SUM(JSON_EXTRACT(doc -> "$.demographics.Population")) AS POPULAÇÃO_TOTAL,
+AVG((doc ->"$.demographics.LifeExpectancy")) AS EXPECTATIVA_VIDA, (doc -> "$.government.GovernmentForm")) AS TIPO_GOVERNO,
+(doc -> "$.Name") AS NOME_PAIS FROM countryinfo WHERE (doc-> "$.government.GovernmentForm") LIKE '%monarchy%' GROUP BY  CONTINENTE, TIPO_GOVERNO, NOME_PAIS;
+
+
+    ON c.Code = ci.Code
+WHERE JSON_UNQUOTE(JSON_EXTRACT(ci.) 
+GROUP BY JSON_UNQUOTE(JSON_EXTRACT(ci.doc, "$.geography.Continent"))
+ORDER BY continente ASC;
+
+
+
+# Questão 2
+/*Demonstre o uso de 3 funções JSON, disponivel na documentação, utilizando diferentes chaves e valores do banco de dados world_x*/
