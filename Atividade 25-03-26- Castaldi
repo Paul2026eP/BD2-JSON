@@ -1,0 +1,58 @@
+# Questão 1
+
+/*Exibam uma tabela com a população total e a média  da expectativa de vida de cada continente para países que
+são monarquias. agrupe e ordene os dados exibidos*/
+
+
+-- ANALISE DAS TABELAS  –
+
+SELECT * FROM city; -- ID, Name, CountryCode, District, Info --
+SELECT * FROM country; -- Code, Name, Capital, Code2 --
+SELECT * FROM countryinfo; -- #, doc ({"GNP": 828, "_id": "00005de917d80000000000000000", "Code": "ABW", "Name": "Aruba", "IndepYear": null, "geography": {"Region": "Caribbean", "Continent": "North America","SurfaceArea": 193}, "government": {"HeadOfState": "Beatrix","GovernmentForm": "Nonmetropolitan Territory of The Netherlands" },"demographics": {"Population": 103000, "LifeExpectancy": 78.4000015258789 }}, _id, _json_schema --
+SELECT * FROM countrylanguage; -- #, CountryCode, Language, IsOfficial, Percentage --
+
+
+#Resposta Questão 1
+
+SELECT (doc -> "$.geography.Continent") AS CONTINENTE, SUM((doc -> "$.demographics.Population"))
+AS POPULAÇÃO_TOTAL, AVG((doc ->"$.demographics.LifeExpectancy")) AS EXPECTATIVA_VIDA,
+(doc -> "$.government.GovernmentForm") AS TIPO_GOVERNO,
+(doc -> "$.Name") AS NOME_PAIS FROM countryinfo WHERE (doc-> "$.government.GovernmentForm") LIKE "%Monarchy%"
+GROUP BY  CONTINENTE, TIPO_GOVERNO, NOME_PAIS;
+
+# Questão 2
+
+/*Demonstre o uso de 3 funções JSON, disponível na documentação, utilizando diferentes chaves e valores do banco de
+dados world_x*/
+
+#1. JSON_EXTRACT: Extrai o valor da população de uma cidade específica
+-- Busca a chave 'Population' dentro do campo 'Info' da tabela 'city'
+
+SELECT
+	Name AS Cidade,
+	JSON_EXTRACT(Info, '$.Population') AS Populacao_JSON
+FROM city
+WHERE Name = 'Nairobi';
+
+
+# 2. JSON_CONTAINS: Filtra países que possuem um idioma específico no array de objetos
+-- Verifica se o documento JSON na tabela 'countryinfo' contém o objeto de idioma espanhol
+
+SELECT
+	Name AS Pais,
+	JSON_EXTRACT(doc, '$.geography.Region') AS Regiao
+FROM countryinfo
+WHERE JSON_CONTAINS(doc, '{"Language": [{"Language": "Spanish"}]}');
+
+
+# 3. JSON_REPLACE: Simula uma atualização de valor (sem alterar o banco permanentemente)
+-- Substitui a capital (Capital) no documento JSON da tabela 'countryinfo' para um valor fictício
+
+SELECT
+	Name,
+	doc->'$.government.Capital' AS Capital_Original,
+	JSON_REPLACE(doc, '$.government.Capital', 9999) AS Doc_Com_Capital_Alterada
+FROM countryinfo
+LIMIT 5;
+
+
